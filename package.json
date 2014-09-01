@@ -1,6 +1,6 @@
 {
 	"name": "pouchdb-wrappers",
-	"version": "0.1.0",
+	"version": "1.0.0",
 	"main": "index.js",
 	"description": "Makes wrapping PouchDB functions a lot easier.",
 	"repository": {
