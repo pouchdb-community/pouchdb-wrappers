@@ -1,6 +1,8 @@
 pouchdb-wrappers
 ================
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/pouchdb/pouchdb-wrappers.svg)](https://greenkeeper.io/)
+
 Makes wrapping PouchDB functions a lot easier. Handy for writing
 plug-ins.
 
