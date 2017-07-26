@@ -447,22 +447,24 @@ function callHandlers(handlers, args, method) {
   //make sure the handler chain is not started, before the corresponding
   //pouchdb instance is fully initialized. Otherwise it might result
   //in a double calling the augmented methods
-  var promise;
+  var promise = Promise.resolve();
   if (!args.base.taskqueue.isReady) {
-    promise = new Promise(function (resolve, reject) {
-      args.base.taskqueue.addTask(function (failed) {
-        if (failed) {
-          reject(failed);
-        } else {
+    promise = promise.then(function () {
+      new Promise(function (resolve, reject) {
+        args.base.taskqueue.addTask(function (failed) {
+          if (failed) {
+            return reject(failed);
+          }
+
           resolve();
-        }
+        });
       });
-    }).then(function () {
-      return method();
-    });
-  } else {
-    promise = method();
+    })
   }
+
+  promise = promise.then(function () {
+    return method();
+  });
 
   //start running the chain.
   nodify(promise, callback);
