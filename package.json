@@ -17,5 +17,8 @@
 	"author": "Marten de Vries",
 	"dependencies": {
 		"promise-nodify": "^1.0.1"
+	},
+	"devDependencies": {
+		"standard": "^16.0.3"
 	}
 }
