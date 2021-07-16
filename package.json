@@ -6,7 +6,7 @@
 	"repository": "pouchdb/pouchdb-wrappers",
 	"scripts": {
 		"test": "npm run test:lint && npm run test:node && npm run test:browser",
-		"test:lint": "standard && dependency-check --unused --no-dev .",
+		"test:lint": "standard",
 		"test:node": "mocha",
 		"test:browser": "mochify test.js",
 		"cov": "npm run cov:node && npm run cov:browser && nyc report",
