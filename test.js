@@ -1,10 +1,10 @@
-/* global describe, it */
-let assert = require('assert').strict
-let PouchDB = require('pouchdb')
-let Wrapper = require('.')
+/* global describe, it, beforeEach, afterEach */
+const assert = require('assert').strict
+const PouchDB = require('pouchdb')
+const Wrapper = require('.')
 
 describe('PouchDB-wrappers', () => {
-  let wrapper = Wrapper
+  const wrapper = Wrapper
   let db
 
   beforeEach(() => {
@@ -17,7 +17,7 @@ describe('PouchDB-wrappers', () => {
 
   it('should wrap put handler', async () => {
     let ok = false
-    handler = {
+    const handler = {
       put: function (original, args) {
         ok = true
         return original()

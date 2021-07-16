@@ -41,7 +41,7 @@ exports.installWrapperMethods = function (db, handlers) {
 
 function installWrappers (base, handlers, createWrapperMethod) {
   for (const name in handlers) {
-    if (!handlers.hasOwnProperty(name)) {
+    if (!Object.prototype.hasOwnProperty.call(handlers, name)) {
       continue
     }
     const info = getBaseAndName(base, name)
@@ -50,7 +50,7 @@ function installWrappers (base, handlers, createWrapperMethod) {
       // no method to wrap
       continue
     }
-    if (original.hasOwnProperty('_handlers')) {
+    if (Object.prototype.hasOwnProperty.call(original, '_handlers')) {
       if (original._handlers.indexOf(handlers[name]) !== -1) {
         throw new Error("Wrapper method for '" + name + "' already installed: " + handlers[name])
       }
@@ -510,7 +510,7 @@ exports.uninstallStaticWrapperMethods = function (PouchDB, handlers) {
 
 function uninstallWrappers (base, handlers) {
   for (const name in handlers) {
-    if (!handlers.hasOwnProperty(name)) {
+    if (!Object.prototype.hasOwnProperty.call(handlers, name)) {
       continue
     }
     const info = getBaseAndName(base, name)
