@@ -1,143 +1,132 @@
 # pouchdb-wrappers
 
-The `pouchdb-wrappers` library is used to wrap PouchDB functions easily. It is helpful in writing plug-ins. It can be used and developed alongside with PouchDB plug-ins.
+The `pouchdb-wrappers` library is used to wrap PouchDB functions easily.
+Multiple handlers can be attached to methods, so that multiple plugins can
+safely wrap the same methods.
 
-[Website for plug-ins](http://python-pouchdb.marten-de-vries.nl/plugins.html)
+As an example:
+
+```javascript
+const PouchDB = require('pouchdb')
+const wrapper = require('pouchdb-wrappers')
+
+// wrap static methods
+wrapper.install(PouchDB, {
+  // wrap the sync method so that we can time synchronization
+  sync: async function (original, ...args) {
+    console.time('sync')
+    const result = await original(...args)
+    console.timeEnd('sync')
+    return result
+  }
+})
+
+// or wrap instance methods
+const db = new PouchDB('your_cool_project')
+wrapper.install(db, {
+  bulkDocs: async function (original, docs, ...args) {
+    // handler methods receive unmodified parameters
+    docs = docs.docs || docs
+    for (const doc of docs) {
+      // assign a timestamp to documents when added to the database
+      if (doc._deleted || doc.createdAt) { continue }
+      doc.createdAt = Date.now()
+    }
+    // then pass the modified params to the original
+    return original(docs, ...args)
+  }
+})
+
+// you can even wrap methods multiple times!
+// the latest handler is run first, then the second-latest, and so on
+wrapper.install(db, {
+  bulkDocs: async function (original, docs, ...args) {
+    docs = docs.docs || docs
+    for (const doc of docs) {
+      if (doc._deleted) { continue }
+      // assign an update timestamp if it already has a creation timestamp
+      if (doc.createdAt) { doc.updatedAt = Date.now() }
+    }
+    return original(docs, ...args)
+  }
+})
+
+// you can also uninstall methods by signature
+const handlers = { get: (original, ...args) => { return original(...args) } }
+wrapper.install(db, handlers)    // wrap a method
+wrapper.uninstall(db, handlers)  // remove a handler using its function
+```
 
 ## Installation
 
-The wrapper can be installed using npm
+The wrapper can be installed using [npm](https://www.npmjs.com/):
 
 ```bash
-npm install pouchdb-wrappers
+$ npm install pouchdb-wrappers
 ```
 
 ## Usage
 
-To use the `pouchdb-wrappers` library, the wrapper needs to be initialised and the relevant wrapper methods need to be installed.
+### wrapper.install(base, handlers)
 
-### Initialise pouchdb-wrappers
+Install wrapper methods on the `base` object. Only methods that already exist
+can be wrapped.
 
-`require` can be used to initialise the wrapper.
+- `base`: The object to modify. May be either the PouchDB class or an instance.
+- `handlers`: An object whose keys are the methods to wrap, and whose values are
+the functions to wrap the original in.
 
-```javascript
-const PouchDB = require('pouchdb')
-const wrappers = require('pouchdb-wrappers')
+The function signature of wrapper methods is `original, ...args`,
+where `original` is the underlying method,
+and `...args` is the list of arguments passed in.
 
-const db = new PouchDB('galactic-alpaca')
-```
+As methods may be wrapped multiple times, `original` may refer to another handler.
+Handlers are run from latest-added to earliest-added, so that the first methods
+installed are run last. The original method is run very last.
 
-### Install WrapperMethods
-
-Once the wrapper is initialised, relevant methods in your application can be wrapped using `installWrapperMethods`. It accepts a database name and a request handler for the method.
-
-```javascript
-wrappers.installWrapperMethods(db, {
-  put: function (original, args) {
-    // Do some stuff
-    return original();
-  }
-});
-```
-
-### Available wrapper methods
-
-Following are some of the `WrapperMethods` that can be used for installing the methods.
-
-- destroy
-- put
-- post
-- get
-- remove
-- bulkDocs
-- bulkGet
-- allDocs
-- createIndex
-- deleteIndex
-- find
-- explain
-- changes
-- sync
-- 'replicate.from'
-- 'replicate.to'
-- putAttachment
-- getAttachment
-- removeAttachment
-- query
-- viewCleanup
-- info
-- getIndexes
-- compact
-- revsDiff
-- list
-- rewriteResultRequestObject
-- show
-- update
-- getSecurity
-- putSecurity
-
-### Install StaticWrappermethods
-
-In addition to `WrapperMethods`, `StaticWrapperMethods` can be used. Some of the methods are listed below.
-
-- destroy
-- new
-- replicate
-- allDbs
-
-The `StaticWrapperMethods` can be installed like so.
+Attempting to wrap methods that do not exist will throw an error. Thus, to wrap
+a custom method, you must first create that custom method. For example:
 
 ```javascript
-wrappers.installStaticWrapperMethods(db, {
-  destroy: function (original, args) {
-    // Do some stuff
-    return original();
-  }
-});
+// a custom constructor method
+PouchDB.new = function (...args) {
+  return new PouchDB(...args)
+}
+// now let's wrap the custom method
+wrapper.install(PouchDB, {
+  new: function (original, ...args) { /* wrap the 'new' method */ }
+})
 ```
 
-### Uninstall WrapperMethods
+### wrapper.uninstall(base, handlers)
 
-To uninstall the WrapperMethods, the following can be used.
+Uninstall wrapper methods on the `base` object. Attempting to uninstall handlers
+that do not exist will throw an error.
 
-```javascript
-// Uninstall WrapperMethods
-wrappers.uninstallWrapperMethods(db, {
-  put: function (original, args) {
-    // Do some stuff
-    return original();
-  }
-});
-
-// Uninstall StaticWrapperMethods
-wrappers.uninstallStaticWrapperMethods(db, {
-  put: function (original, args) {
-    // Do some stuff
-    return original();
-  }
-});
-```
+- `base`: The object to modify. May be either the PouchDB class or an instance.
+- `handlers`: An object whose keys are the methods to wrap, and whose values are
+the functions to wrap the original in.
 
 ## Development
 
-### Local setup
+If you encounter bugs or want to request features, please [file an issue](https://github.com/pouchdb/pouchdb-wrappers/issues)!
 
-For local development clone the `pouchdb-wrappers` repository in your local machine and run installation.
-
-```bash
-git clone git@github.com:pouchdb/pouchdb-wrappers.git
-cd pouchdb-wrappers
-npm install
-```
-
-### Run tests
-
-To run tests for your application you can use the following:
+To hack on this project locally, first get the source and install dependencies:
 
 ```bash
-npm test
+$ git clone git@github.com:pouchdb/pouchdb-wrappers.git
+$ cd pouchdb-wrappers
+$ npm install
 ```
+
+Then you can run the test suite:
+
+```bash
+$ npm test
+```
+
+*When contributing patches, be a good neighbor and include tests!*
 
 ## License
 
-`pouchdb-wrappers` is licensed under the [Apache 2 License](https://www.apache.org/licenses/LICENSE-2.0).
+[Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
