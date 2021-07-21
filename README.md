@@ -1,8 +1,12 @@
-# pouchdb-wrappers
+# PouchDB-Wrappers
 
-The `pouchdb-wrappers` library is used to wrap PouchDB functions easily.
-Multiple handlers can be attached to methods, so that multiple plugins can
-safely wrap the same methods.
+[![CI](https://github.com/pouchdb/pouchdb-wrappers/actions/workflows/ci.yaml/badge.svg)](https://github.com/pouchdb/pouchdb-wrappers/actions/workflows/ci.yaml)
+[![NPM Version](https://img.shields.io/npm/v/pouchdb-wrappers.svg?style=flat-square)](https://www.npmjs.com/package/pouchdb-wrappers)
+[![JS Standard Style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/feross/standard)
+
+A library used to wrap PouchDB functions easily.
+Multiple handlers can be attached to methods,
+so that multiple plugins can safely wrap the same methods.
 
 As an example:
 
@@ -72,7 +76,7 @@ $ npm install pouchdb-wrappers
 Install wrapper methods on the `base` object. Only methods that already exist
 can be wrapped.
 
-- `base`: The object to modify. May be either the PouchDB class or an instance.
+- `base`: The object to modify. May be either the PouchDB class or an instance of it.
 - `handlers`: An object whose keys are the methods to wrap, and whose values are
 the functions to wrap the original in.
 
