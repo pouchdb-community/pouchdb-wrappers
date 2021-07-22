@@ -21,11 +21,28 @@ function installWrappers (base, handlers = {}) {
       base._handlers[method] = [handler]
       // create the new wrapped method
       base[method] = function (...args) {
-        let prev = base._originals[method]
-        for (const handler of base._handlers[method]) {
-          prev = handler.bind(base, prev)
+        // compose handlers on top of the base method
+        const doMethod = () => {
+          let prev = base._originals[method].bind(base)
+          for (const handler of base._handlers[method]) {
+            prev = handler.bind(base, prev)
+          }
+          return prev(...args)
         }
-        return prev(...args)
+        // await pouchdb task queue before calling the method
+        if (base.taskqueue && !base.taskqueue.isReady) {
+          const promise = new Promise((resolve, reject) => {
+            base.taskqueue.addTask((error) => {
+              if (error) { return reject(error) }
+              else { return resolve() }
+            })
+          })
+          return promise.then(() => {
+            return doMethod()
+          })
+        } else {
+          return doMethod()
+        }
       }
     }
   }
