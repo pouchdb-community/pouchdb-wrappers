@@ -33,8 +33,7 @@ function installWrappers (base, handlers = {}) {
         if (base.taskqueue && !base.taskqueue.isReady) {
           const promise = new Promise((resolve, reject) => {
             base.taskqueue.addTask((error) => {
-              if (error) { return reject(error) }
-              else { return resolve() }
+              if (error) { return reject(error) } else { return resolve() }
             })
           })
           return promise.then(() => {
