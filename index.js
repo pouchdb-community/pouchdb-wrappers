@@ -1,5 +1,7 @@
 'use strict'
 
+const nodify = require('promise-nodify')
+
 function installWrappers (base, handlers = {}) {
   if (!base._originals || !base._handlers) {
     base._originals = {}
@@ -37,12 +39,20 @@ function replacementMethod (base, method) {
       await dbReady
     }
 
+    // remove callback from args list if present
+    let callback = null
+    if (typeof args[args.length - 1] === 'function') {
+      callback = args.pop()
+    }
+
     // compose handlers on top of the base method
     let prev = base._originals[method].bind(base)
     for (const handler of base._handlers[method]) {
       prev = handler.bind(base, prev)
     }
-    return prev(...args)
+    const result = prev(...args)
+    nodify(result, callback)
+    return result
   }
 }
 

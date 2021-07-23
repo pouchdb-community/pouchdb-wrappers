@@ -68,6 +68,43 @@ describe('PouchDB-wrappers', () => {
     assert(ok2)
   })
 
+  it('should allow use of callbacks for wrappers', (done) => {
+    wrapper.install(db, {
+      get: async function (original, docId) {
+        const doc = await original(docId)
+        doc.modified = true
+        return doc
+      }
+    })
+
+    db.put({ _id: 'mydoc' }).then(() => {
+      db.get('mydoc', (_, doc) => {
+        assert(doc.modified)
+        done()
+      })
+    })
+  })
+
+  it('should allow use of callbacks for wrappers with ...args', (done) => {
+    wrapper.install(db, {
+      get: async function (original, ...args) {
+        const doc = await original(...args)
+        doc.modified = true
+        doc.args_count = args.length
+        return doc
+      }
+    })
+
+    db.put({ _id: 'mydoc' }).then(() => {
+      db.get('mydoc', { revs: true }, (_, doc) => {
+        assert.equal(doc._revisions.start, 1)
+        assert(doc.modified)
+        assert.equal(doc.args_count, 2)
+        done()
+      })
+    })
+  })
+
   it('should throw an error when uninstalling an non-installed method', async () => {
     let ok = false
     const handler = {
