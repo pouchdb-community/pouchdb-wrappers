@@ -102,6 +102,32 @@ wrapper.install(PouchDB, {
 })
 ```
 
+PouchDB supports using callbacks with its API methods, but callbacks will _not_
+be passed to your wrapper methods. Wrappers should return a `Promise` and they
+should assume that the `original` function returns a `Promise`.
+`pouchdb-wrappers` takes care of making callbacks work for external callers. For
+example, if you install a `get()` wrapper...
+
+```javascript
+wrapper.install(db, {
+  get: async function (original, ...args) {
+    let doc = await original(...args)
+    doc.modified = true
+    return doc
+  }
+})
+```
+
+... then the application can still call `db.get()` with a callback. The callback
+will not be included in the wrapper's `args` parameter and the wrapper doesn't
+need to include any logic to make callbacks work.
+
+```javascript
+db.get('mydoc', { revs: true }, (error, doc) => {
+  // doc.modified === true
+})
+```
+
 ### wrapper.uninstall(base, handlers)
 
 Uninstall wrapper methods on the `base` object. Attempting to uninstall handlers
