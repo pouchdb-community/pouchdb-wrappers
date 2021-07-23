@@ -20,30 +20,29 @@ function installWrappers (base, handlers = {}) {
     } else {
       base._handlers[method] = [handler]
       // create the new wrapped method
-      base[method] = function (...args) {
-        // compose handlers on top of the base method
-        const doMethod = () => {
-          let prev = base._originals[method].bind(base)
-          for (const handler of base._handlers[method]) {
-            prev = handler.bind(base, prev)
-          }
-          return prev(...args)
-        }
-        // await pouchdb task queue before calling the method
-        if (base.taskqueue && !base.taskqueue.isReady) {
-          const promise = new Promise((resolve, reject) => {
-            base.taskqueue.addTask((error) => {
-              if (error) { return reject(error) } else { return resolve() }
-            })
-          })
-          return promise.then(() => {
-            return doMethod()
-          })
-        } else {
-          return doMethod()
-        }
-      }
+      base[method] = replacementMethod(base, method)
     }
+  }
+}
+
+function replacementMethod (base, method) {
+  return async function (...args) {
+    // await pouchdb task queue before calling the method
+    if (base.taskqueue && !base.taskqueue.isReady) {
+      const dbReady = new Promise((resolve, reject) => {
+        base.taskqueue.addTask((error) => {
+          if (error) { return reject(error) } else { return resolve() }
+        })
+      })
+      await dbReady
+    }
+
+    // compose handlers on top of the base method
+    let prev = base._originals[method].bind(base)
+    for (const handler of base._handlers[method]) {
+      prev = handler.bind(base, prev)
+    }
+    return prev(...args)
   }
 }
 
