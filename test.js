@@ -176,4 +176,17 @@ describe('PouchDB-wrappers', () => {
       assert(ok)
     }
   })
+
+  it('should wrap synchronous methods ok', async function () {
+    let ok = false
+    wrapper.install(db, {
+      changes: function (original, ...args) {
+        ok = true
+        return original(...args)
+      }
+    })
+    const changes = db.changes()
+    assert(changes.db)
+    assert(ok)
+  })
 })

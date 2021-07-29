@@ -1,6 +1,10 @@
 'use strict'
 
-const nodify = require('promise-nodify')
+function nodify (promise, callback) {
+  promise
+    .then((...args) => { callback(null, ...args) })
+    .catch((err) => { callback(err) })
+}
 
 function installWrappers (base, handlers = {}) {
   if (!base._originals || !base._handlers) {
@@ -28,31 +32,36 @@ function installWrappers (base, handlers = {}) {
 }
 
 function replacementMethod (base, method) {
-  return async function (...args) {
+  return function (...args) {
+    function doMethod () {
+      // remove callback from args list if present
+      let callback = null
+      const minArgs = method === 'query' ? 1 : 0 // some methods take a function that is not a callback
+      if (args.length > minArgs && typeof args[args.length - 1] === 'function') {
+        callback = args.pop()
+      }
+      // compose handlers on top of the base method
+      let prev = base._originals[method].bind(base)
+      for (const handler of base._handlers[method]) {
+        prev = handler.bind(base, prev)
+      }
+      // execute wrapped method, nodify result w/ callback
+      const result = prev(...args)
+      if (result.then && callback) { nodify(result, callback) }
+      return result
+    }
     // await pouchdb task queue before calling the method
-    if (base.taskqueue && !base.taskqueue.isReady) {
+    if (method !== 'changes' && base.taskqueue && !base.taskqueue.isReady) {
       const dbReady = new Promise((resolve, reject) => {
         base.taskqueue.addTask((error) => {
-          if (error) { return reject(error) } else { return resolve() }
+          // istanbul ignore next
+          if (error) { reject(error) } else { resolve() }
         })
       })
-      await dbReady
+      return dbReady.then(doMethod)
+    } else {
+      return doMethod()
     }
-
-    // remove callback from args list if present
-    let callback = null
-    if (typeof args[args.length - 1] === 'function') {
-      callback = args.pop()
-    }
-
-    // compose handlers on top of the base method
-    let prev = base._originals[method].bind(base)
-    for (const handler of base._handlers[method]) {
-      prev = handler.bind(base, prev)
-    }
-    const result = prev(...args)
-    nodify(result, callback)
-    return result
   }
 }
 
