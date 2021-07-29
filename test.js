@@ -189,4 +189,22 @@ describe('PouchDB-wrappers', () => {
     assert(changes.db)
     assert(ok)
   })
+
+  it('should not callback-ify methods with function args that are not a callback', async function () {
+    wrapper.install(db, {
+      query: function (original, ...args) {
+        return original(...args)
+      }
+    })
+    await db.put({ _id: 'hello', hello: 'world' })
+    const result = await db.query((doc) => {
+      if (doc.hello === 'world') {
+        // istanbul ignore next
+        emit(doc.hello)
+      }
+    })
+    assert.equal(result.rows.length, 1)
+    assert.equal(result.rows[0].id, 'hello')
+    assert.equal(result.rows[0].key, 'world')
+  })
 })
