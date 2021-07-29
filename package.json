@@ -26,8 +26,6 @@
 	],
 	"license": "Apache-2.0",
 	"author": "Marten de Vries",
-	"dependencies": {
-	},
 	"devDependencies": {
 		"babel-plugin-istanbul": "^6.0.0",
 		"babelify": "^10.0.0",

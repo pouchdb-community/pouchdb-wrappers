@@ -83,7 +83,18 @@ function uninstallWrappers (base, handlers) {
   }
 }
 
-module.exports = {
+const toExport = {
   install: installWrappers,
   uninstall: uninstallWrappers
 }
+
+// istanbul ignore next
+try {
+  module.exports = toExport
+} catch { /* module does not exist */ }
+
+// istanbul ignore next
+try {
+  // attach to window if possible
+  window.PouchDBWrappers = toExport
+} catch { /* window does not exist */ }
