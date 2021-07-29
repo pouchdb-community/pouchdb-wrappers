@@ -50,7 +50,7 @@ describe('PouchDB-wrappers', () => {
     let ok1, ok2
     const handlers1 = {
       get: function (original, ...args) {
-        ok1 = true
+        if (!ok2) ok1 = true // assert first-added runs first
         return original(...args)
       }
     }

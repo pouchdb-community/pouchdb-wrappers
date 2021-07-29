@@ -85,8 +85,8 @@ where `original` is the underlying method,
 and `...args` is the list of arguments passed in.
 
 As methods may be wrapped multiple times, `original` may refer to another handler.
-Handlers are run from latest-added to earliest-added, so that the first methods
-installed are run last. The original method is run very last.
+Handlers are run from first-added to last-added, so that the first methods
+installed are run first. The original method is run very last.
 
 Attempting to wrap methods that do not exist will throw an error. Thus, to wrap
 a custom method, you must first create that custom method. For example:
@@ -103,10 +103,10 @@ wrapper.install(PouchDB, {
 ```
 
 PouchDB supports using callbacks with its API methods, but callbacks will _not_
-be passed to your wrapper methods. Wrappers should return a `Promise` and they
-should assume that the `original` function returns a `Promise`.
-`pouchdb-wrappers` takes care of making callbacks work for external callers. For
-example, if you install a `get()` wrapper...
+be passed to your wrapper methods. Wrappers which wrap asynchronous methods
+should return a `Promise` and they should assume that the `original` function
+returns a `Promise`. `pouchdb-wrappers` takes care of making callbacks work for
+external callers. For example, if you install a `get()` wrapper...
 
 ```javascript
 wrapper.install(db, {

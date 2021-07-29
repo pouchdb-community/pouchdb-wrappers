@@ -22,7 +22,7 @@ function installWrappers (base, handlers = {}) {
     }
     // add a handler for this method
     if (method in base._handlers) {
-      base._handlers[method].push(handler)
+      base._handlers[method].unshift(handler)
     } else {
       base._handlers[method] = [handler]
       // create the new wrapped method
