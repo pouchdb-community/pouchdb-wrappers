@@ -1,4 +1,4 @@
-/* global describe, it, beforeEach, afterEach */
+/* global describe, it, beforeEach, afterEach, emit */
 const assert = require('assert').strict
 const PouchDB = require('pouchdb')
 const wrapper = require('.')
@@ -199,7 +199,6 @@ describe('PouchDB-wrappers', () => {
     await db.put({ _id: 'hello', hello: 'world' })
     const result = await db.query((doc) => {
       if (doc.hello === 'world') {
-        // istanbul ignore next
         emit(doc.hello)
       }
     })
