@@ -1,9 +1,12 @@
 {
 	"name": "pouchdb-wrappers",
 	"version": "5.0.0",
-	"main": "index.js",
 	"description": "Makes wrapping PouchDB functions a lot easier.",
 	"repository": "pouchdb/pouchdb-wrappers",
+	"main": "index.js",
+	"files": [
+		"index.js"
+	],
 	"scripts": {
 		"test": "npm run test:lint && npm run test:deps && npm run test:node && npm run test:browser",
 		"test:lint": "standard",
