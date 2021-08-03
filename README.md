@@ -1,6 +1,6 @@
 # PouchDB-Wrappers
 
-[![CI](https://github.com/pouchdb/pouchdb-wrappers/actions/workflows/ci.yaml/badge.svg)](https://github.com/pouchdb/pouchdb-wrappers/actions/workflows/ci.yaml)
+[![CI](https://github.com/pouchdb-community/pouchdb-wrappers/actions/workflows/ci.yaml/badge.svg)](https://github.com/pouchdb-community/pouchdb-wrappers/actions/workflows/ci.yaml)
 [![NPM Version](https://img.shields.io/npm/v/pouchdb-wrappers.svg?style=flat-square)](https://www.npmjs.com/package/pouchdb-wrappers)
 [![JS Standard Style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/feross/standard)
 
