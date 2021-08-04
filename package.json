@@ -2,7 +2,10 @@
 	"name": "pouchdb-wrappers",
 	"version": "5.0.0",
 	"description": "Makes wrapping PouchDB functions a lot easier.",
-	"repository": "pouchdb/pouchdb-wrappers",
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/pouchdb-community/pouchdb-wrappers.git"
+	},
 	"main": "index.js",
 	"files": [
 		"index.js"

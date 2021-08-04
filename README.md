@@ -139,12 +139,12 @@ the functions to wrap the original in.
 
 ## Development
 
-If you encounter bugs or want to request features, please [file an issue](https://github.com/pouchdb/pouchdb-wrappers/issues)!
+If you encounter bugs or want to request features, please [file an issue](https://github.com/pouchdb-community/pouchdb-wrappers/issues)!
 
 To hack on this project locally, first get the source and install dependencies:
 
 ```bash
-$ git clone git@github.com:pouchdb/pouchdb-wrappers.git
+$ git clone git@github.com:pouchdb-community/pouchdb-wrappers.git
 $ cd pouchdb-wrappers
 $ npm install
 ```
