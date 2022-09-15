@@ -2,7 +2,7 @@
 
 function nodify (promise, callback) {
   promise
-    .then((...args) => { callback(null, ...args) })
+    .then((...args) => { callback(...args) })
     .catch((err) => { callback(err) })
 }
 
