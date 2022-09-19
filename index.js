@@ -26,12 +26,12 @@ function installWrappers (base, handlers = {}) {
     } else {
       base._handlers[method] = [handler]
       // create the new wrapped method
-      base[method] = replacementMethod(base, method)
+      base[method] = replacementMethod(method)
     }
   }
 }
 
-function replacementMethod (base, method) {
+function replacementMethod (method) {
   return function (...args) {
     function doMethod () {
       // remove callback from args list if present
@@ -41,9 +41,9 @@ function replacementMethod (base, method) {
         callback = args.pop()
       }
       // compose handlers on top of the base method
-      let prev = base._originals[method].bind(base)
-      for (const handler of base._handlers[method]) {
-        prev = handler.bind(base, prev)
+      let prev = this._originals[method].bind(this)
+      for (const handler of this._handlers[method]) {
+        prev = handler.bind(this, prev)
       }
       // execute wrapped method, nodify result w/ callback
       const result = prev(...args)
@@ -51,16 +51,16 @@ function replacementMethod (base, method) {
       return result
     }
     // await pouchdb task queue before calling the method
-    if (method !== 'changes' && base.taskqueue && !base.taskqueue.isReady) {
+    if (method !== 'changes' && this.taskqueue && !this.taskqueue.isReady) {
       const dbReady = new Promise((resolve, reject) => {
-        base.taskqueue.addTask((error) => {
+        this.taskqueue.addTask((error) => {
           // istanbul ignore next
           if (error) { reject(error) } else { resolve() }
         })
       })
-      return dbReady.then(doMethod)
+      return dbReady.then(doMethod.bind(this))
     } else {
-      return doMethod()
+      return doMethod.call(this)
     }
   }
 }
